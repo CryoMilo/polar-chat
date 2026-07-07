@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: mongo:6
+    image: mongo:7
     container_name: polar_mongo
     restart: unless-stopped
     ports:
