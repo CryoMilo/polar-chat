@@ -55,12 +55,12 @@ export class AuthController {
 			const user = await User.findOne({ email });
 
 			if (!user) {
-				return res.status(400).json({ message: "Invalid Credentials!" });
+				return res.status(400).json({ message: "Invalid credentials!" });
 			}
 
 			const isValidPassword = await bcrypt.compare(password, user.password);
 			if (!isValidPassword) {
-				return res.status(400).json({ message: "Invalid Credentials!" });
+				return res.status(400).json({ message: "Invalid credentials!" });
 			}
 
 			const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
@@ -84,7 +84,30 @@ export class AuthController {
 				},
 			});
 		} catch (error) {
-			console.error("Server Error", error);
+			res.status(500).json({ message: `Internal server error ${error}` });
+		}
+	}
+
+	static async me(req, res) {
+		try {
+			const user = await User.findById(req.user.id).select("-password");
+
+			if (!user) {
+				return res.status(400).json({ message: "User not found!" });
+			}
+
+			res.status(200).json({
+				user: {
+					id: user.id,
+					username: user.username,
+					fullname: user.fullname,
+					email: user.email,
+					connectCode: user.connectCode,
+				},
+			});
+		} catch (error) {
+			console.log(error);
+			res.status(500).json({ message: "Internal Server Error" });
 		}
 	}
 }
