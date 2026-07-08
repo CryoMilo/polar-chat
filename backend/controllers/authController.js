@@ -1,5 +1,7 @@
 import User from "../models/User";
 import bcrypt from "bcryptjs";
+import { generateConnectCode } from "../utils/generateConnectCode";
+import jwt from "jsonwebtoken";
 
 export class AuthController {
 	static async register(req, res) {
@@ -14,11 +16,11 @@ export class AuthController {
 				return res.status(400).json({ message: "Password is too short" });
 			}
 
-			const existingUser = await User.findOne({
+			const userExists = await User.exists({
 				$or: [{ username }, { email }],
 			});
 
-			if (existingUser) {
+			if (userExists) {
 				return res.status(400).json({ message: "User already exists!" });
 			}
 
@@ -30,7 +32,7 @@ export class AuthController {
 				username: username,
 				email: email,
 				password: hashedPassword,
-				connectCode: "",
+				connectCode: await generateConnectCode(),
 			});
 
 			await user.save();
@@ -39,6 +41,50 @@ export class AuthController {
 		} catch (error) {
 			console.error("Server Error", error);
 			process.exit(1);
+		}
+	}
+
+	static async login(req, res) {
+		try {
+			const { email, password } = req.body;
+
+			if (!email || !password) {
+				return res.status(400).json({ message: "All fields are required" });
+			}
+
+			const user = await User.findOne({ email });
+
+			if (!user) {
+				return res.status(400).json({ message: "Invalid Credentials!" });
+			}
+
+			const isValidPassword = await bcrypt.compare(password, user.password);
+			if (!isValidPassword) {
+				return res.status(400).json({ message: "Invalid Credentials!" });
+			}
+
+			const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+				expiresIn: "7d",
+			});
+
+			res.cookie("jwt", token, {
+				maxAge: 7 * 24 * 60 * 60 * 1000,
+				httpOnly: true,
+				sameSite: "strict",
+				secure: process.env.NODE_ENV !== "development",
+			});
+
+			res.status(200).json({
+				user: {
+					id: user.id,
+					fullname: user.fullname,
+					username: user.username,
+					email: user.email,
+					connectCode: user.connectCode,
+				},
+			});
+		} catch (error) {
+			console.error("Server Error", error);
 		}
 	}
 }
