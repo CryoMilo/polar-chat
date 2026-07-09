@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { generateConnectCode } from "../utils/generateConnectCode";
 import jwt from "jsonwebtoken";
 
-export class AuthController {
+export default class AuthController {
 	static async register(req, res) {
 		try {
 			const { fullName, username, email, password } = req.body;
@@ -85,6 +85,14 @@ export class AuthController {
 			});
 		} catch (error) {
 			res.status(500).json({ message: `Internal server error ${error}` });
+		}
+	}
+
+	static async logout(req, res) {
+		try {
+		} catch (error) {
+			console.log(error);
+			res.status(500).json({ message: "Internal server Error" });
 		}
 	}
 
