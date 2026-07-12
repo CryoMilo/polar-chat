@@ -88,8 +88,15 @@ export default class AuthController {
 		}
 	}
 
-	static async logout(req, res) {
+	static async logout() {
 		try {
+			res.clearCookie("jwt", {
+				httpOnly: true,
+				sameSite: "strict",
+				secure: process.env.NODE_ENV !== "development",
+			});
+
+			res.status(204).json({ message: "Logout Successful" });
 		} catch (error) {
 			console.log(error);
 			res.status(500).json({ message: "Internal server Error" });

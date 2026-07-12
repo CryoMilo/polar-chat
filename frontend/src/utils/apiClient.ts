@@ -1,0 +1,10 @@
+//Axios client ayin htaung
+//axios create loke -> baseURL, withCredentials : true
+import axios from "axios";
+
+const apiClient = axios.create({
+	baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
+	withCredentials: true,
+});
+
+export default apiClient;
