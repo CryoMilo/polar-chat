@@ -7,10 +7,10 @@ export const authService = {
 	},
 
 	register: async (data: {
+		fullName: string;
+		username: string;
 		email: string;
 		password: string;
-		username: string;
-		fullName: string;
 	}) => {
 		const response = await apiClient.post("/auth/register", data);
 		return response.data;
