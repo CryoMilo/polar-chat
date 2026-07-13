@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { authService } from "../../../services/authService";
 import { toast } from "sonner";
+import { useAuthStore } from "../../../../stores/authStore";
+import { useNavigate } from "react-router";
 
 interface LoginFormProps {
 	onSwitch: () => void;
@@ -18,6 +20,8 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSwitch }) => {
+	const navigate = useNavigate();
+	const { setUser } = useAuthStore();
 	const {
 		register,
 		handleSubmit,
@@ -28,9 +32,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitch }) => {
 
 	const mutation = useMutation({
 		mutationFn: authService.login,
-		onSuccess: () => {
-			onSwitch();
+		onSuccess: (data) => {
+			setUser(data);
 			toast.success("Login Successful");
+			navigate("/");
 		},
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onError: (err: any) => {
