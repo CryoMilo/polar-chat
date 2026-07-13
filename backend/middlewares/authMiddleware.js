@@ -3,7 +3,8 @@
 //         // 1. Check the ID badge
 //         LOOK inside the request's cookie pile for a cookie named "jwt"
 
-import User from "../models/User";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 //         // 2. No badge? No entry.
 //         IF there is no "jwt" cookie:

@@ -11,7 +11,7 @@ const App: React.FC = () => {
 				<Route path="/" element={<Chat />} />
 				<Route path="/auth" element={<Auth />} />
 			</Routes>
-			<Toaster />
+			<Toaster richColors position="top-right" />
 		</>
 	);
 };

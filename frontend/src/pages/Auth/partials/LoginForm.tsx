@@ -32,7 +32,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitch }) => {
 			onSwitch();
 			toast.success("Login Successful");
 		},
-		onError: (err: { response }) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		onError: (err: any) => {
 			const msg = err.response?.data?.message || "Login Failed";
 			toast.error(msg);
 		},

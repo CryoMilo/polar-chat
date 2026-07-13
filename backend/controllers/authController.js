@@ -1,6 +1,6 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import { generateConnectCode } from "../utils/generateConnectCode";
+import { generateConnectCode } from "../utils/generateConnectCode.js";
 import jwt from "jsonwebtoken";
 
 export default class AuthController {
