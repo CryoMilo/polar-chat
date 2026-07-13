@@ -1,6 +1,6 @@
 import apiClient from "../utils/apiClient";
 
-export const authService = {
+const authService = {
 	login: async (data: { email: string; password: string }) => {
 		const response = await apiClient.post("/auth/login", data);
 		return response.data;
@@ -26,3 +26,5 @@ export const authService = {
 		return response.data;
 	},
 };
+
+export default authService;
