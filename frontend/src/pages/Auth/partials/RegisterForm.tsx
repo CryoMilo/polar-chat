@@ -51,7 +51,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitch }) => {
 			onSwitch();
 			toast.success("Account Created");
 		},
-		onError: (err) => {
+		onError: (err: { response }) => {
 			const msg = err.response.data.message || "Registration Failed";
 			toast.error(msg);
 		},
