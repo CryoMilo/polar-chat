@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { authService } from "../../../services/authService";
+import authService from "../../../services/authService.ts";
 import { toast } from "sonner";
 import { useAuthStore } from "../../../../stores/authStore";
 import { useNavigate } from "react-router";
