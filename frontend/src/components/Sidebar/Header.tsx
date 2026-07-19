@@ -8,7 +8,7 @@ const Header: React.FC = () => {
 				<div className="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-500/20">
 					<MessageSquareCode size={20} />
 				</div>
-				<h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">
+				<h1 className="text-xl font-bold tracking-tight bg-linear-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">
 					Polar Chat
 				</h1>
 			</div>

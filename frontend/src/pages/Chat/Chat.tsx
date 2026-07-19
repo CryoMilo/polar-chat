@@ -15,7 +15,7 @@ const Chat: React.FC = () => {
 			</div>
 
 			{/* On mobile devices: Show/Hide based on selection */}
-			<div className="md:hidden flex-shrink-0">
+			<div className="md:hidden shrink-0">
 				<Sidebar />
 			</div>
 

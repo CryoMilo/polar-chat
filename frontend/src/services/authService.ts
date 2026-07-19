@@ -7,7 +7,7 @@ const authService = {
 	},
 
 	register: async (data: {
-		fullName: string;
+		fullname: string;
 		username: string;
 		email: string;
 		password: string;
@@ -22,7 +22,7 @@ const authService = {
 	},
 
 	logout: async () => {
-		const response = await apiClient.post("auth/logout");
+		const response = await apiClient.post("/auth/logout");
 		return response.data;
 	},
 };

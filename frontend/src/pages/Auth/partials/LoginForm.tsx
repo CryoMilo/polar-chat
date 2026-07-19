@@ -33,7 +33,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitch }) => {
 	const mutation = useMutation({
 		mutationFn: authService.login,
 		onSuccess: (data) => {
-			setUser(data);
+			setUser(data.user);
 			toast.success("Login Successful");
 			navigate("/");
 		},

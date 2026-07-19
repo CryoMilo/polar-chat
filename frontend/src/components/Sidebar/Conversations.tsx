@@ -5,7 +5,8 @@ const MOCK_CONVERSATIONS = [
 	{
 		id: "1",
 		name: "Alice Johnson",
-		avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+		avatar:
+			"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
 		isOnline: true,
 		lastMessage: "Are we still meeting today at 5 PM?",
 		time: "2m ago",
@@ -14,7 +15,8 @@ const MOCK_CONVERSATIONS = [
 	{
 		id: "2",
 		name: "Robert Smith",
-		avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+		avatar:
+			"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
 		isOnline: false,
 		lastMessage: "I uploaded the assets to the shared drive.",
 		time: "1h ago",
@@ -23,7 +25,8 @@ const MOCK_CONVERSATIONS = [
 	{
 		id: "3",
 		name: "Emily Davis",
-		avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
+		avatar:
+			"https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
 		isOnline: true,
 		lastMessage: "Haha that's amazing! 😂 Let me know.",
 		time: "3h ago",
@@ -32,7 +35,8 @@ const MOCK_CONVERSATIONS = [
 	{
 		id: "4",
 		name: "Alex Martinez",
-		avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+		avatar:
+			"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
 		isOnline: true,
 		lastMessage: "Can you review the PR?",
 		time: "Yesterday",
@@ -41,7 +45,8 @@ const MOCK_CONVERSATIONS = [
 	{
 		id: "5",
 		name: "Sophia Chen",
-		avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150",
+		avatar:
+			"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150",
 		isOnline: false,
 		lastMessage: "Thank you for the guidance!",
 		time: "2 days ago",
@@ -55,9 +60,8 @@ const Conversations: React.FC = () => {
 			{MOCK_CONVERSATIONS.map((chat) => (
 				<div
 					key={chat.id}
-					className="flex items-center gap-3 p-3 my-1 rounded-xl cursor-pointer hover:bg-slate-800/40 active:bg-slate-800/60 transition-all duration-200"
-				>
-					<div className="relative flex-shrink-0">
+					className="flex items-center gap-3 p-3 my-1 rounded-xl cursor-pointer hover:bg-slate-800/40 active:bg-slate-800/60 transition-all duration-200">
+					<div className="relative shrink-0">
 						<img
 							src={chat.avatar}
 							alt={chat.name}

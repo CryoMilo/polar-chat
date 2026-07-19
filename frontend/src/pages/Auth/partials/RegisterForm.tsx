@@ -12,7 +12,7 @@ interface RegisterFormProps {
 
 const registerSchema = z
 	.object({
-		fullName: z
+		fullname: z
 			.string()
 			.trim()
 			.min(3, "Full name must be at least 3 characters")
@@ -74,20 +74,20 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitch }) => {
 			<form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
 				<div>
 					<label
-						htmlFor="fullName"
+						htmlFor="fullname"
 						className="block text-sm font-medium text-gray-700">
 						Full Name
 					</label>
 					<input
-						id="fullName"
+						id="fullname"
 						type="text"
-						{...register("fullName")}
+						{...register("fullname")}
 						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 						placeholder="John Doe"
 					/>
-					{errors.fullName && (
+					{errors.fullname && (
 						<p className="text-red-500 text-xs mt-1">
-							{errors.fullName.message}
+							{errors.fullname.message}
 						</p>
 					)}
 				</div>

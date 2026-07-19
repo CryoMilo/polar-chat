@@ -6,9 +6,9 @@ import jwt from "jsonwebtoken";
 export default class AuthController {
 	static async register(req, res) {
 		try {
-			const { fullName, username, email, password } = req.body;
+			const { fullname, username, email, password } = req.body;
 
-			if (!fullName || !username || !email || !password) {
+			if (!fullname || !username || !email || !password) {
 				return res.status(400).json({ message: "All fields are required" });
 			}
 
@@ -28,7 +28,7 @@ export default class AuthController {
 			const hashedPassword = await bcrypt.hashSync(password, salt);
 
 			const user = new User({
-				fullname: fullName,
+				fullname: fullname,
 				username: username,
 				email: email,
 				password: hashedPassword,
@@ -88,7 +88,7 @@ export default class AuthController {
 		}
 	}
 
-	static async logout() {
+	static async logout(req, res) {
 		try {
 			res.clearCookie("jwt", {
 				httpOnly: true,
