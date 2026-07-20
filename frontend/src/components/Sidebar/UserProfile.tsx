@@ -3,29 +3,20 @@ import { LogOut, Copy } from "lucide-react";
 import { useAuthStore } from "../../../stores/authStore";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
-import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import authService from "../../services/authService";
 
 const UserProfile: React.FC = () => {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const { user, logout } = useAuthStore();
 
-	const mutation = useMutation({
-		mutationFn: authService.logout,
-		onSuccess: () => {
-			toast.success("Logout Successful");
-			navigate("/auth");
-		},
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onError: (err: any) => {
-			const msg = err.response?.data?.message || "Logout Failed";
-			toast.error(msg);
-		},
-	});
-
-	const onLogout = () => {
-		mutation.mutate();
+	const onLogout = async () => {
+		await authService.logout();
 		logout();
+		queryClient.removeQueries({ queryKey: ["auth"] });
+		navigate("/auth");
+		toast.success("Logout Successful");
 	};
 
 	if (!user) {
