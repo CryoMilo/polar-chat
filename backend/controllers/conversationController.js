@@ -85,17 +85,17 @@ export default class conversationController {
 					const conversation = conversationMap.get(friend._id.toString());
 
 					return {
-						conversationId: conversation.id,
-						lastMessage: conversation.lastMessagePreview || null,
+						conversationId: conversation ? conversation.id : null,
+						lastMessage: conversation?.lastMessagePreview || null,
 						unreadCounts: {
 							[friendship.requester._id.toString()]:
-								conversation.unreadCounts.get(
-									friendship.requester._id.toString()
-								) || 0,
+								conversation?.unreadCounts instanceof Map
+									? conversation.unreadCounts.get(friendship.requester._id.toString()) || 0
+									: conversation?.unreadCounts?.[friendship.requester._id.toString()] || 0,
 							[friendship.recipient._id.toString()]:
-								conversation.unreadCounts.get(
-									friendship.recipient._id.toString()
-								) || 0,
+								conversation?.unreadCounts instanceof Map
+									? conversation.unreadCounts.get(friendship.recipient._id.toString()) || 0
+									: conversation?.unreadCounts?.[friendship.recipient._id.toString()] || 0,
 						},
 						friend: {
 							id: friend._id.toString(),

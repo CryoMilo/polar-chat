@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import Conversation from "../models/Conversation.js";
@@ -20,7 +23,7 @@ async function resetDatabase() {
 	}
 }
 
-async function seedDatabase() {
+async function seed() {
 	try {
 		// 1. Reset the database to ensure we start from a clean slate
 		await resetDatabase();
@@ -61,7 +64,7 @@ async function seedDatabase() {
 				email: "damian@polar.chat",
 				password: passwordHash,
 				connectCode: "444444",
-			}
+			},
 		]);
 
 		const [alice, robert, emily, damian] = users;
@@ -95,7 +98,8 @@ async function seedDatabase() {
 			{
 				conversation: conv1._id,
 				sender: damian._id,
-				content: "Yes, Alice! I just finished setting up the Tailwind templates.",
+				content:
+					"Yes, Alice! I just finished setting up the Tailwind templates.",
 			},
 			{
 				conversation: conv2._id,
@@ -119,4 +123,4 @@ async function seedDatabase() {
 	}
 }
 
-export { seedDatabase };
+seed();
