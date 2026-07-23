@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import http from "http";
 import { connectDB } from "./utils/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import conversationRoutes from "./routes/conversationRoutes.js";
 
 const app = express();
 const httpserver = http.createServer(app);
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 try {
 	await connectDB();
