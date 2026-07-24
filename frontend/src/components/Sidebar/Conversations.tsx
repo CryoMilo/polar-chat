@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
+import conversationService from "../../services/conversationService";
+import { data } from "react-router";
 
 // Mock data representing conversations
 const MOCK_CONVERSATIONS = [
@@ -55,6 +57,16 @@ const MOCK_CONVERSATIONS = [
 ];
 
 const Conversations: React.FC = () => {
+	const getConversations = async () => {
+		const data = await conversationService.getConversations();
+
+		console.log(data);
+	};
+
+	useEffect(() => {
+		getConversations();
+	}, []);
+
 	return (
 		<div className="flex-1 overflow-y-auto divide-y divide-slate-800/40 bg-[#0f172a] px-2 py-1 select-none">
 			{MOCK_CONVERSATIONS.map((chat) => (
