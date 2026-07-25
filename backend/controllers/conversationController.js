@@ -49,11 +49,11 @@ export default class conversationController {
 				.lean();
 
 			if (!friendships.length) {
-				return res.json({ date: [] });
+				return res.json({ data: [] });
 			}
 
 			const friendIds = friendships.map((friend) =>
-				friend.requester._id.toString() === userId._id.toString()
+				friend.requester._id.toString() === userId.toString()
 					? friend.recipient._id.toString()
 					: friend.requester._id.toString()
 			);
@@ -90,12 +90,20 @@ export default class conversationController {
 						unreadCounts: {
 							[friendship.requester._id.toString()]:
 								conversation?.unreadCounts instanceof Map
-									? conversation.unreadCounts.get(friendship.requester._id.toString()) || 0
-									: conversation?.unreadCounts?.[friendship.requester._id.toString()] || 0,
+									? conversation.unreadCounts.get(
+											friendship.requester._id.toString()
+									  ) || 0
+									: conversation?.unreadCounts?.[
+											friendship.requester._id.toString()
+									  ] || 0,
 							[friendship.recipient._id.toString()]:
 								conversation?.unreadCounts instanceof Map
-									? conversation.unreadCounts.get(friendship.recipient._id.toString()) || 0
-									: conversation?.unreadCounts?.[friendship.recipient._id.toString()] || 0,
+									? conversation.unreadCounts.get(
+											friendship.recipient._id.toString()
+									  ) || 0
+									: conversation?.unreadCounts?.[
+											friendship.recipient._id.toString()
+									  ] || 0,
 						},
 						friend: {
 							id: friend._id.toString(),

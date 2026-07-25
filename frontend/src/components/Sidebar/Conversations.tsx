@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import conversationService from "../../services/conversationService";
-import { data } from "react-router";
 
 // Mock data representing conversations
 const MOCK_CONVERSATIONS = [
@@ -58,7 +57,7 @@ const MOCK_CONVERSATIONS = [
 
 const Conversations: React.FC = () => {
 	const getConversations = async () => {
-		const data = await conversationService.getConversations();
+		const data = await conversationService.fetchConversations();
 
 		console.log(data);
 	};
