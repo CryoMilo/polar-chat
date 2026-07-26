@@ -11,6 +11,15 @@ const UserProfile: React.FC = () => {
 	const queryClient = useQueryClient();
 	const { user, logout } = useAuthStore();
 
+	const copyToClipboard = async () => {
+		try {
+			await navigator.clipboard.writeText(user.connectCode);
+		} catch (error) {
+			console.log("Copy failed", error);
+			toast.error("Failed to Copy");
+		}
+	};
+
 	const onLogout = async () => {
 		await authService.logout();
 		logout();
@@ -40,7 +49,7 @@ const UserProfile: React.FC = () => {
 					</h4>
 					<div className="flex items-center gap-1 mt-0.5 text-xs text-slate-500 cursor-pointer hover:text-slate-300">
 						<span>#{user.connectCode}</span>
-						<Copy size={12} />
+						<Copy size={12} onClick={() => copyToClipboard()} />
 					</div>
 				</div>
 			</div>

@@ -12,7 +12,13 @@ const Conversations: React.FC = () => {
 			{filteredConversations.map(
 				(chat: Conversation) =>
 					chat.conversationId && (
-						<ConversationItem key={chat.conversationId} chat={chat} />
+						<ConversationItem
+							key={chat.conversationId}
+							friend={chat.friend}
+							unreadCounts={chat.unreadCounts}
+							conversationId={chat.conversationId}
+							lastMessage={chat.lastMessage}
+						/>
 					)
 			)}
 		</div>
