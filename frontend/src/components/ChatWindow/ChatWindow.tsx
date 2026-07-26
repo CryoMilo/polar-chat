@@ -1,5 +1,13 @@
 import React from "react";
-import { Send, Image, Smile, Phone, Video, MoreVertical, Paperclip } from "lucide-react";
+import {
+	Send,
+	Image,
+	Smile,
+	Phone,
+	Video,
+	MoreVertical,
+	Paperclip,
+} from "lucide-react";
 
 // Mock data representing a conversation's messages
 const MOCK_MESSAGES = [
@@ -32,7 +40,8 @@ const MOCK_MESSAGES = [
 const ChatWindow: React.FC = () => {
 	const activeContact = {
 		name: "Alice Johnson",
-		avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+		avatar:
+			"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
 		isOnline: true,
 		isTyping: true,
 	};
@@ -53,7 +62,9 @@ const ChatWindow: React.FC = () => {
 						)}
 					</div>
 					<div>
-						<h3 className="text-sm font-semibold text-slate-200">{activeContact.name}</h3>
+						<h3 className="text-sm font-semibold text-slate-200">
+							{activeContact.name}
+						</h3>
 						<span className="text-xs text-slate-500">
 							{activeContact.isTyping ? "typing..." : "online"}
 						</span>
@@ -79,21 +90,18 @@ const ChatWindow: React.FC = () => {
 					return (
 						<div
 							key={msg.id}
-							className={`flex ${isMe ? "justify-end" : "justify-start"}`}
-						>
+							className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
 							<div
 								className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
 									isMe
 										? "bg-blue-600 text-white rounded-br-none shadow-lg shadow-blue-600/15"
 										: "bg-slate-800/80 text-slate-200 rounded-bl-none border border-slate-700/30"
-								}`}
-							>
-								<p className="leading-relaxed break-words">{msg.text}</p>
+								}`}>
+								<p className="leading-relaxed wrap-break-word">{msg.text}</p>
 								<span
 									className={`block text-[10px] mt-1 text-right ${
 										isMe ? "text-blue-200" : "text-slate-500"
-									}`}
-								>
+									}`}>
 									{msg.timestamp}
 								</span>
 							</div>
@@ -117,23 +125,22 @@ const ChatWindow: React.FC = () => {
 
 			{/* Message Input Section */}
 			<div className="p-4 border-t border-blue-50/10 bg-[#0f172a]">
-				<form className="flex items-center gap-2" onSubmit={(e) => e.preventDefault()}>
+				<form
+					className="flex items-center gap-2"
+					onSubmit={(e) => e.preventDefault()}>
 					<button
 						type="button"
-						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200"
-					>
+						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
 						<Paperclip size={20} />
 					</button>
 					<button
 						type="button"
-						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200"
-					>
+						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
 						<Image size={20} />
 					</button>
 					<button
 						type="button"
-						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200"
-					>
+						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
 						<Smile size={20} />
 					</button>
 					<input
@@ -143,8 +150,7 @@ const ChatWindow: React.FC = () => {
 					/>
 					<button
 						type="submit"
-						className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/10 active:scale-95 transition-all duration-200"
-					>
+						className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/10 active:scale-95 transition-all duration-200">
 						<Send size={20} />
 					</button>
 				</form>

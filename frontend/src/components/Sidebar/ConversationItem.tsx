@@ -1,15 +1,31 @@
 import type { Conversation } from "../../contexts/ConversationsContext";
+import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
 interface ConversationItemProps {
 	chat: Conversation;
 }
 
 const ConversationItem: React.FC<ConversationItemProps> = ({ chat }) => {
-	const now = new Date();
+	const shortLocale = {
+		formatDistance: (token: string, count: number) => {
+			const units: Record<string, string> = {
+				xSeconds: `${count}s`,
+				xMinutes: `${count}m`,
+				xHours: `${count}h`,
+				xDays: `${count}d`,
+				xMonths: `${count}m`,
+				xYears: `${count}y`,
+			};
+			return units[token] ?? `${count}s`;
+		},
+	};
+
 	const lastMsg = new Date(chat.lastMessage.timestamp);
 
-	const diffInMiutes = now.getTime() - lastMsg.getTime();
-	console.log(diffInMiutes);
+	const diffInMiutes = formatDistanceToNowStrict(lastMsg, {
+		addSuffix: false,
+		locale: shortLocale,
+	});
 
 	return (
 		<div
