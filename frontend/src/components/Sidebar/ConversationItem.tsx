@@ -1,28 +1,15 @@
 import type { Conversation } from "../../contexts/ConversationsContext";
-import { formatDistanceToNowStrict, parseISO } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
+import { shortLocale } from "../../utils/dates";
 
 interface ConversationItemProps {
 	chat: Conversation;
 }
 
 const ConversationItem: React.FC<ConversationItemProps> = ({ chat }) => {
-	const shortLocale = {
-		formatDistance: (token: string, count: number) => {
-			const units: Record<string, string> = {
-				xSeconds: `${count}s`,
-				xMinutes: `${count}m`,
-				xHours: `${count}h`,
-				xDays: `${count}d`,
-				xMonths: `${count}m`,
-				xYears: `${count}y`,
-			};
-			return units[token] ?? `${count}s`;
-		},
-	};
-
 	const lastMsg = new Date(chat.lastMessage.timestamp);
 
-	const diffInMiutes = formatDistanceToNowStrict(lastMsg, {
+	const diffInTime = formatDistanceToNowStrict(lastMsg, {
 		addSuffix: false,
 		locale: shortLocale,
 	});
@@ -33,12 +20,14 @@ const ConversationItem: React.FC<ConversationItemProps> = ({ chat }) => {
 			className="flex items-center gap-3 p-3 my-1 rounded-xl cursor-pointer hover:bg-slate-800/40 active:bg-slate-800/60 transition-all duration-200">
 			<div className="relative shrink-0">
 				<img
-					src="https://picsum.photos/200?random=1"
+					src={`https://avatarapi.runflare.run/public?usearname=${chat.friend.username}`}
 					alt={chat.friend.fullname}
 					className="w-12 h-12 rounded-full object-cover border border-slate-700/50"
 				/>
-				{chat.friend.online && (
+				{chat.friend.online ? (
 					<span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
+				) : (
+					<span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-gray-400 ring-2 ring-slate-900" />
 				)}
 			</div>
 			<div className="flex-1 min-w-0">
@@ -47,7 +36,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({ chat }) => {
 						{chat.friend.fullname}
 					</h3>
 					<span className="text-xs text-slate-500 whitespace-nowrap">
-						{diffInMiutes}
+						{diffInTime}
 					</span>
 				</div>
 				<div className="flex items-center justify-between mt-1">

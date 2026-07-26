@@ -28,7 +28,7 @@ const UserProfile: React.FC = () => {
 			<div className="flex items-center gap-3 min-w-0">
 				<div className="relative shrink-0">
 					<img
-						src="https://avatar.iran.liara.run/public"
+						src={`https://avatarapi.runflare.run/public?usearname=${user.username}`}
 						alt="User"
 						className="size-10 rounded-full object-cover border border-slate-700"
 					/>

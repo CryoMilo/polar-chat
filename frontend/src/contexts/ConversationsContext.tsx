@@ -12,6 +12,7 @@ export type Conversation = {
 		content: string;
 		timestamp: Date;
 	};
+	img?: string;
 };
 
 type ConversationsContextype = {
