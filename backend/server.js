@@ -8,6 +8,9 @@ import http from "http";
 import { connectDB } from "./utils/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
+import { Server } from "socket.io";
+import { initializeSocket } from "./socket.js";
+import { socketAuthMiddleware } from "./socket/socketAuthMiddleware.js";
 
 const app = express();
 const httpserver = http.createServer(app);
@@ -24,6 +27,19 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/conversations", conversationRoutes);
+
+const io = new Server(httpserver, {
+	cors: {
+		origin: process.env.CLIENT_ORIGIN,
+		credentials: true,
+		methods: ["GET", "POST"],
+	},
+	pingInterval: 25000,
+	pingTimeout: 60000,
+});
+
+io.use(socketAuthMiddleware);
+await initializeSocket(io);
 
 try {
 	await connectDB();
