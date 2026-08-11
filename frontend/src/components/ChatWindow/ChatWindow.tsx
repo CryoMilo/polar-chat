@@ -7,7 +7,9 @@ import {
 	Video,
 	MoreVertical,
 	Paperclip,
+	ArrowLeft,
 } from "lucide-react";
+import { useMobileChat } from "../../contexts/MobileChatContext";
 
 // Mock data representing a conversation's messages
 const MOCK_MESSAGES = [
@@ -38,6 +40,8 @@ const MOCK_MESSAGES = [
 ];
 
 const ChatWindow: React.FC = () => {
+	const { setIsMobileChatOpen } = useMobileChat();
+
 	const activeContact = {
 		name: "Alice Johnson",
 		avatar:
@@ -51,6 +55,14 @@ const ChatWindow: React.FC = () => {
 			{/* Chat Header */}
 			<div className="flex items-center justify-between p-4 border-b border-blue-50/10 bg-[#0f172a] text-white">
 				<div className="flex items-center gap-3">
+					{/* Back Button (Mobile Only) */}
+					<button
+						onClick={() => setIsMobileChatOpen(false)}
+						className="md:hidden p-2 -ml-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200"
+					>
+						<ArrowLeft size={20} />
+					</button>
+
 					<div className="relative">
 						<img
 							src={activeContact.avatar}

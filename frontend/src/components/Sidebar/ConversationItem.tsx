@@ -2,6 +2,7 @@ import type { Conversation } from "../../contexts/ConversationsContext";
 import { formatDistanceToNowStrict } from "date-fns";
 import { shortLocale } from "../../utils/dates";
 import { useAuthStore } from "../../../stores/authStore";
+import { useMobileChat } from "../../contexts/MobileChatContext";
 
 const ConversationItem: React.FC<Conversation> = ({
 	conversationId,
@@ -11,6 +12,7 @@ const ConversationItem: React.FC<Conversation> = ({
 }) => {
 	const lastMsg = new Date(lastMessage.timestamp);
 	const { user } = useAuthStore();
+	const { setIsMobileChatOpen } = useMobileChat();
 
 	const diffInTime = formatDistanceToNowStrict(lastMsg, {
 		addSuffix: false,
@@ -20,6 +22,7 @@ const ConversationItem: React.FC<Conversation> = ({
 	return (
 		<div
 			key={conversationId}
+			onClick={() => setIsMobileChatOpen(true)}
 			className="flex items-center gap-3 p-3 my-1 rounded-xl cursor-pointer hover:bg-slate-800/40 active:bg-slate-800/60 transition-all duration-200">
 			<div className="relative shrink-0">
 				<img

@@ -1,6 +1,7 @@
 import Conversation from "../models/Conversation.js";
 import Friendship from "../models/Friendship.js";
 import User from "../models/User.js";
+import RedisService from "../services/RedisService.js";
 
 export default class conversationController {
 	static async checkConnectCode(req, res) {
@@ -110,7 +111,7 @@ export default class conversationController {
 							username: friend.username,
 							fullname: friend.fullname,
 							connectCode: friend.connectCode,
-							online: false,
+							online: await RedisService.isUserOnline(friend._id.toString()),
 						},
 					};
 				}),

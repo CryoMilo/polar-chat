@@ -40,6 +40,7 @@ const io = new Server(httpserver, {
 });
 
 io.use(socketAuthMiddleware);
+
 await initializeSocket(io);
 
 await RedisService.initialize();

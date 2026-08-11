@@ -11,10 +11,10 @@ export const notifyConversationOnlineStatus = async (io, socket, online) => {
 
 		friendships.forEach((friendship) => {
 			const isRequester =
-				friendship.requester.id.toString() === userId.toString();
+				friendship.requester.toString() === userId.toString();
 			const friendId = isRequester
-				? friendship.recipient._id
-				: friendship.requester._id;
+				? friendship.recipient
+				: friendship.requester;
 
 			console.log("emit:conversation:online-status");
 			io.to(friendId.toString()).emit("conversation:online-status", {

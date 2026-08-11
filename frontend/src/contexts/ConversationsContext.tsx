@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { User } from "../../stores/authStore";
 import { useConversations } from "../hooks/useConversation";
 import { useSocketContext } from "./SocketContext";
@@ -55,6 +55,11 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [searchTerm, setSearchTerm] = useState("");
 	const { socket } = useSocketContext();
 
+	const conversationsRef = useRef<Conversation[]>([]);
+	useEffect(() => {
+		conversationsRef.current = conversations;
+	}, [conversations]);
+
 	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		if (data) setConversations(data.data);
@@ -69,12 +74,17 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 		username,
 		online,
 	}: FriendOnlineStatus) => {
+		const friendConversation = conversationsRef.current?.find(
+			(c) => c.friend.id === friendId
+		);
+
+		if (friendConversation && friendConversation.friend.online !== online) {
+			toast.info(`${username} is ${online ? "online" : "offline"}`);
+		}
+
 		setConversations((prev) => {
 			return prev.map((conversation) => {
 				if (conversation.friend.id === friendId) {
-					if (conversation.friend.online != online) {
-						toast.info(`${username} is ${online ? "online" : "offline"}`);
-					}
 					return {
 						...conversation,
 						friend: { ...conversation.friend, online },
