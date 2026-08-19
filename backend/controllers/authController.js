@@ -40,7 +40,7 @@ export default class AuthController {
 			res.status(201).json({ success: true, message: "User Created!" });
 		} catch (error) {
 			console.error("Server Error", error);
-			process.exit(1);
+			res.status(500).json({ message: "Internal Server Error" });
 		}
 	}
 
