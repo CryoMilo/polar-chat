@@ -1,7 +1,11 @@
 import React from "react";
 import { MessageSquarePlus, Settings, MessageSquareCode } from "lucide-react";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+	onAddClick?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onAddClick }) => {
 	return (
 		<div className="flex items-center justify-between p-4 border-b border-blue-50/10 bg-[#0f172a] text-white">
 			<div className="flex items-center gap-2">
@@ -13,7 +17,11 @@ const Header: React.FC = () => {
 				</h1>
 			</div>
 			<div className="flex items-center gap-3">
-				<button className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
+				<button
+					onClick={onAddClick}
+					className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200"
+					title="Add Friend"
+				>
 					<MessageSquarePlus size={20} />
 				</button>
 				<button className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">

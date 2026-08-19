@@ -10,14 +10,16 @@ const ConversationItem: React.FC<Conversation> = ({
 	lastMessage,
 	unreadCounts,
 }) => {
-	const lastMsg = new Date(lastMessage.timestamp);
+	const lastMsg = lastMessage?.timestamp ? new Date(lastMessage.timestamp) : null;
 	const { user } = useAuthStore();
 	const { setIsMobileChatOpen } = useMobileChat();
 
-	const diffInTime = formatDistanceToNowStrict(lastMsg, {
-		addSuffix: false,
-		locale: shortLocale,
-	});
+	const diffInTime = lastMsg
+		? formatDistanceToNowStrict(lastMsg, {
+				addSuffix: false,
+				locale: shortLocale,
+		  })
+		: "";
 
 	return (
 		<div
@@ -47,7 +49,7 @@ const ConversationItem: React.FC<Conversation> = ({
 				</div>
 				<div className="flex items-center justify-between mt-1">
 					<p className="text-xs text-slate-400 truncate pr-4">
-						{lastMessage.content}
+						{lastMessage?.content || "No messages yet"}
 					</p>
 					{user && unreadCounts[user.id] > 0 && (
 						<span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-bold text-white bg-blue-600 rounded-full">

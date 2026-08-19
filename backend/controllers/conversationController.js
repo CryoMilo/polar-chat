@@ -36,6 +36,61 @@ export default class conversationController {
 		}
 	}
 
+	static async addConversation(req, res) {
+		try {
+			const userId = req.user._id;
+			const { connectCode } = req.body;
+
+			if (!connectCode) {
+				return res.status(400).json({ message: "Connect code is required" });
+			}
+
+			const friend = await User.findOne({ connectCode });
+
+			if (!friend) {
+				return res.status(404).json({ message: "User not found with this connect code" });
+			}
+
+			if (friend._id.toString() === userId.toString()) {
+				return res.status(400).json({ message: "You cannot add yourself" });
+			}
+
+			const existingFriendship = await Friendship.findOne({
+				$or: [
+					{ requester: userId, recipient: friend._id },
+					{ requester: friend._id, recipient: userId },
+				],
+			});
+
+			if (existingFriendship) {
+				return res.status(400).json({ message: "Friendship already exists" });
+			}
+
+			// Create friendship
+			const friendship = await Friendship.create({
+				requester: userId,
+				recipient: friend._id,
+			});
+
+			// Create conversation
+			const conversation = await Conversation.create({
+				participants: [userId, friend._id],
+			});
+
+			res.json({
+				success: true,
+				message: "Conversation created successfully",
+				data: {
+					friendship,
+					conversation,
+				},
+			});
+		} catch (error) {
+			console.error("Error adding conversation:", error);
+			res.status(500).json({ message: "Internal Server Error" });
+		}
+	}
+
 	static async getConversations(req, res) {
 		try {
 			const userId = req.user._id;

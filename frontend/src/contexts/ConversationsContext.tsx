@@ -13,7 +13,7 @@ export type Conversation = {
 	lastMessage: {
 		content: string;
 		timestamp: Date;
-	};
+	} | null;
 };
 
 type ConversationsContextype = {

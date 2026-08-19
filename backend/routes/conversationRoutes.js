@@ -9,6 +9,11 @@ router.get(
 	authMiddleware,
 	ConversationController.checkConnectCode
 );
+router.post(
+	"/add",
+	authMiddleware,
+	ConversationController.addConversation
+);
 router.get("/", authMiddleware, ConversationController.getConversations);
 
 export default router;

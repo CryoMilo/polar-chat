@@ -14,6 +14,13 @@ const conversationService = {
 		});
 		return response.data;
 	},
+
+	addConversation: async (connectCode: string) => {
+		const response = await apiClient.post("/conversations/add", {
+			connectCode,
+		});
+		return response.data;
+	},
 };
 
 export default conversationService;
