@@ -14,9 +14,10 @@ const ConversationItem: React.FC<Conversation> = (props) => {
 	const lastMsg = lastMessage?.timestamp ? new Date(lastMessage.timestamp) : null;
 	const { user } = useAuthStore();
 	const { setIsMobileChatOpen } = useMobileChat();
-	const { activeConversation, setActiveConversation } = useConversationContext();
+	const { activeConversation, setActiveConversation, typingStatus } = useConversationContext();
 
 	const isActive = activeConversation?.conversationId === conversationId;
+	const isFriendTyping = typingStatus[conversationId];
 
 	const diffInTime = lastMsg
 		? formatDistanceToNowStrict(lastMsg, {
@@ -57,9 +58,15 @@ const ConversationItem: React.FC<Conversation> = (props) => {
 					</span>
 				</div>
 				<div className="flex items-center justify-between mt-1">
-					<p className="text-xs text-slate-400 truncate pr-4">
-						{lastMessage?.content || "No messages yet"}
-					</p>
+					{isFriendTyping ? (
+						<p className="text-xs text-blue-400 font-medium animate-pulse truncate pr-4">
+							typing...
+						</p>
+					) : (
+						<p className="text-xs text-slate-400 truncate pr-4">
+							{lastMessage?.content || "No messages yet"}
+						</p>
+					)}
 					{user && unreadCounts[user.id] > 0 && (
 						<span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-bold text-white bg-blue-600 rounded-full">
 							{unreadCounts[user.id] > 99 ? "99+" : unreadCounts[user.id]}

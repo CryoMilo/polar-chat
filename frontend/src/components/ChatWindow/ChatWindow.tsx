@@ -20,18 +20,22 @@ import { toast } from "sonner";
 
 const ChatWindow: React.FC = () => {
 	const { setIsMobileChatOpen } = useMobileChat();
-	const { activeConversation } = useConversationContext();
+	const { activeConversation, typingStatus } = useConversationContext();
 	const { user } = useAuthStore();
 	const { socket } = useSocketContext();
 	const [inputText, setInputText] = useState("");
 	const [messages, setMessages] = useState<any[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
+	const [isLocalTyping, setIsLocalTyping] = useState(false);
+	const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 	if (!activeConversation) {
 		throw new Error("ChatWindow rendered without an active conversation");
 	}
 
 	const { friend, conversationId } = activeConversation;
+	const isFriendTyping = typingStatus[conversationId];
 
 	const { data: fetchedMessages, isLoading } = useQuery({
 		queryKey: ["messages", conversationId],
@@ -85,11 +89,48 @@ const ChatWindow: React.FC = () => {
 
 	useEffect(() => {
 		scrollToBottom();
-	}, [messages]);
+	}, [messages, isFriendTyping]);
+
+	useEffect(() => {
+		return () => {
+			if (typingTimeoutRef.current) {
+				clearTimeout(typingTimeoutRef.current);
+			}
+		};
+	}, [conversationId]);
+
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setInputText(e.target.value);
+
+		if (!socket || !conversationId) return;
+
+		if (!isLocalTyping) {
+			setIsLocalTyping(true);
+			socket.emit("typing:start", { conversationId, recipientId: friend.id });
+		}
+
+		if (typingTimeoutRef.current) {
+			clearTimeout(typingTimeoutRef.current);
+		}
+
+		typingTimeoutRef.current = setTimeout(() => {
+			setIsLocalTyping(false);
+			socket.emit("typing:stop", { conversationId, recipientId: friend.id });
+		}, 2000);
+	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!inputText.trim() || isSending) return;
+
+		if (typingTimeoutRef.current) {
+			clearTimeout(typingTimeoutRef.current);
+		}
+		if (isLocalTyping) {
+			setIsLocalTyping(false);
+			socket?.emit("typing:stop", { conversationId, recipientId: friend.id });
+		}
+
 		sendMessage(inputText.trim());
 	};
 
@@ -123,7 +164,11 @@ const ChatWindow: React.FC = () => {
 							{friend.fullname}
 						</h3>
 						<span className="text-xs text-slate-500">
-							{friend.online ? "online" : "offline"}
+							{isFriendTyping ? (
+								<span className="text-blue-400 font-medium animate-pulse">typing...</span>
+							) : (
+								friend.online ? "online" : "offline"
+							)}
 						</span>
 					</div>
 				</div>
@@ -144,7 +189,7 @@ const ChatWindow: React.FC = () => {
 			<div className="flex-1 overflow-y-auto p-4 space-y-4">
 				{isLoading ? (
 					<div className="h-full flex items-center justify-center">
-						<div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+						<div className="w-8 h-8 border-4 border-blue-50/30 border-t-blue-500 rounded-full animate-spin" />
 					</div>
 				) : messages.length === 0 ? (
 					<div className="h-full flex flex-col items-center justify-center text-slate-500">
@@ -179,6 +224,19 @@ const ChatWindow: React.FC = () => {
 						);
 					})
 				)}
+
+				{/* Typing Indicator Bubble */}
+				{isFriendTyping && (
+					<div className="flex justify-start">
+						<div className="bg-slate-800/80 rounded-2xl rounded-bl-none px-4 py-3 border border-slate-700/30">
+							<div className="flex items-center gap-1">
+								<span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100" />
+								<span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200" />
+								<span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-300" />
+							</div>
+						</div>
+					</div>
+				)}
 				<div ref={messagesEndRef} />
 			</div>
 
@@ -205,7 +263,7 @@ const ChatWindow: React.FC = () => {
 					<input
 						type="text"
 						value={inputText}
-						onChange={(e) => setInputText(e.target.value)}
+						onChange={handleInputChange}
 						placeholder="Type a message..."
 						disabled={isSending}
 						className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"

@@ -25,6 +25,7 @@ type ConversationsContextype = {
 	setSearchTerm: (term: string) => void;
 	activeConversation: Conversation | null;
 	setActiveConversation: (conversation: Conversation | null) => Promise<void>;
+	typingStatus: Record<string, boolean>;
 
 	isLoading: boolean;
 	isError: boolean;
@@ -58,6 +59,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [conversations, setConversations] = useState<Conversation[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [activeConversation, setActiveConversationState] = useState<Conversation | null>(null);
+	const [typingStatus, setTypingStatus] = useState<Record<string, boolean>>({});
 	const { socket } = useSocketContext();
 	const { user } = useAuthStore();
 
@@ -168,11 +170,23 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 			});
 		};
 
+		const handleTypingStart = (data: { conversationId: string }) => {
+			setTypingStatus((prev) => ({ ...prev, [data.conversationId]: true }));
+		};
+
+		const handleTypingStop = (data: { conversationId: string }) => {
+			setTypingStatus((prev) => ({ ...prev, [data.conversationId]: false }));
+		};
+
 		socket?.on("message:new", handleNewMessageGlobal);
+		socket?.on("typing:start", handleTypingStart);
+		socket?.on("typing:stop", handleTypingStop);
 
 		return () => {
 			socket?.off("conversation:online-status", handleConversationOnlineStatus);
 			socket?.off("message:new", handleNewMessageGlobal);
+			socket?.off("typing:start", handleTypingStart);
+			socket?.off("typing:stop", handleTypingStop);
 		};
 	}, [socket, user]);
 
@@ -185,6 +199,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 				setSearchTerm,
 				activeConversation,
 				setActiveConversation,
+				typingStatus,
 				isLoading,
 				isError,
 			}}>

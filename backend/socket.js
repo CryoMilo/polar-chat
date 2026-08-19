@@ -12,6 +12,14 @@ export const initializeSocket = async (io) => {
 			await RedisService.addUserSession(user.id, socket.id);
 			await notifyConversationOnlineStatus(io, socket, true);
 
+			socket.on("typing:start", ({ conversationId, recipientId }) => {
+				io.to(recipientId).emit("typing:start", { conversationId, senderId: socket.userId });
+			});
+
+			socket.on("typing:stop", ({ conversationId, recipientId }) => {
+				io.to(recipientId).emit("typing:stop", { conversationId, senderId: socket.userId });
+			});
+
 			socket.on("disconnect", async () => {
 				await notifyConversationOnlineStatus(io, socket, false);
 
