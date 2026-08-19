@@ -20,20 +20,20 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer,
 	}
 
 	return <>
-		<div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-			<div className="bg-white rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto w-full"
+		<div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-50">
+			<div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto w-full"
 				style={{ maxWidth: sizeClass[size] }}>
 
-				<div className="p-6 border-b border-gray-200 flex justify-between items-center">
-					{title && <h3 className="text-xl font-bold text-gray-900">{title}</h3>}
-					<button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+				<div className="p-6 border-b border-slate-800/60 flex justify-between items-center">
+					{title && <h3 className="text-xl font-bold text-slate-100">{title}</h3>}
+					<button onClick={onClose} className="text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 p-1.5 rounded-lg transition-colors duration-150">
 						<XIcon className="w-5 h-5" />
 					</button>
 				</div>
 				<div className="p-6">
 					{children}
 				</div>
-				{footer && <div className="p-6 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+				{footer && <div className="p-6 border-t border-slate-800/60 flex justify-end gap-3 bg-slate-900/40 rounded-b-2xl">
 					{footer}
 				</div>}
 			</div>

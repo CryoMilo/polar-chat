@@ -11,8 +11,10 @@ export type Message = {
 };
 
 const messageService = {
-	fetchMessages: async (conversationId: string): Promise<Message[]> => {
-		const response = await apiClient.get(`/messages/${conversationId}`);
+	fetchMessages: async (conversationId: string, limit?: number, before?: string): Promise<Message[]> => {
+		const response = await apiClient.get(`/messages/${conversationId}`, {
+			params: { limit, before },
+		});
 		return response.data.data;
 	},
 

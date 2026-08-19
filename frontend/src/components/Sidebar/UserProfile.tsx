@@ -11,6 +11,10 @@ const UserProfile: React.FC = () => {
 	const queryClient = useQueryClient();
 	const { user, logout } = useAuthStore();
 
+	if (!user) {
+		return null;
+	}
+
 	const copyToClipboard = async () => {
 		try {
 			await navigator.clipboard.writeText(user.connectCode);
@@ -27,10 +31,6 @@ const UserProfile: React.FC = () => {
 		navigate("/auth");
 		toast.success("Logout Successful");
 	};
-
-	if (!user) {
-		return null;
-	}
 
 	return (
 		<div className="p-4 border-t border-blue-50/10 bg-[#0b0f19] flex items-center justify-between">

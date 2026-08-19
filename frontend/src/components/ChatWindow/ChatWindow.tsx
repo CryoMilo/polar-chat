@@ -1,22 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-	Send,
-	Image,
-	Smile,
-	Phone,
-	Video,
-	MoreVertical,
-	Paperclip,
-	ArrowLeft,
-} from "lucide-react";
 import { useMobileChat } from "../../contexts/MobileChatContext";
 import { useConversationContext } from "../../contexts/ConversationsContext";
 import { useAuthStore } from "../../../stores/authStore";
 import { useSocketContext } from "../../contexts/SocketContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import messageService from "../../services/messageService";
-import { format } from "date-fns";
+import type { Message } from "../../services/messageService";
 import { toast } from "sonner";
+import ChatHeader from "./ChatHeader";
+import MessageFeed from "./MessageFeed";
+import MessageInput from "./MessageInput";
 
 const ChatWindow: React.FC = () => {
 	const { setIsMobileChatOpen } = useMobileChat();
@@ -24,11 +17,15 @@ const ChatWindow: React.FC = () => {
 	const { user } = useAuthStore();
 	const { socket } = useSocketContext();
 	const [inputText, setInputText] = useState("");
-	const [messages, setMessages] = useState<any[]>([]);
-	const messagesEndRef = useRef<HTMLDivElement | null>(null);
+	const [messages, setMessages] = useState<Message[]>([]);
+	const feedRef = useRef<HTMLDivElement | null>(null);
+	const inputRef = useRef<HTMLInputElement | null>(null);
 
 	const [isLocalTyping, setIsLocalTyping] = useState(false);
-	const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const [hasMore, setHasMore] = useState(true);
+	const [isFetchingEarlier, setIsFetchingEarlier] = useState(false);
 
 	if (!activeConversation) {
 		throw new Error("ChatWindow rendered without an active conversation");
@@ -52,6 +49,7 @@ const ChatWindow: React.FC = () => {
 				return [...prev, newMessage];
 			});
 			setInputText("");
+			requestAnimationFrame(() => scrollToBottom("smooth"));
 		},
 		onError: () => {
 			toast.error("Failed to send message. Please try again.");
@@ -61,6 +59,16 @@ const ChatWindow: React.FC = () => {
 	useEffect(() => {
 		if (fetchedMessages) {
 			setMessages(fetchedMessages);
+			if (fetchedMessages.length < 20) {
+				setHasMore(false);
+			} else {
+				setHasMore(true);
+			}
+			requestAnimationFrame(() => {
+				if (feedRef.current) {
+					feedRef.current.scrollTop = feedRef.current.scrollHeight;
+				}
+			});
 		}
 	}, [fetchedMessages]);
 
@@ -83,13 +91,25 @@ const ChatWindow: React.FC = () => {
 		};
 	}, [socket, conversationId]);
 
-	const scrollToBottom = () => {
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	const scrollToBottom = (behavior: "smooth" | "auto" = "smooth") => {
+		if (feedRef.current) {
+			feedRef.current.scrollTo({
+				top: feedRef.current.scrollHeight,
+				behavior,
+			});
+		}
 	};
 
+	// Auto-scroll on new messages if near bottom
 	useEffect(() => {
-		scrollToBottom();
-	}, [messages, isFriendTyping]);
+		const container = feedRef.current;
+		if (container) {
+			const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+			if (isNearBottom || isFriendTyping) {
+				scrollToBottom("smooth");
+			}
+		}
+	}, [messages.length, isFriendTyping]);
 
 	useEffect(() => {
 		return () => {
@@ -98,6 +118,59 @@ const ChatWindow: React.FC = () => {
 			}
 		};
 	}, [conversationId]);
+
+	// Auto-focus input field on active conversation change
+	useEffect(() => {
+		inputRef.current?.focus();
+	}, [conversationId]);
+
+	const fetchEarlierMessages = async () => {
+		if (isFetchingEarlier || !hasMore || messages.length === 0) return;
+
+		setIsFetchingEarlier(true);
+
+		const oldestMessage = messages[0];
+		const oldestTimestamp = oldestMessage.createdAt;
+
+		try {
+			const container = feedRef.current;
+			const previousScrollHeight = container ? container.scrollHeight : 0;
+
+			const limit = 20;
+			const earlier = await messageService.fetchMessages(conversationId, limit, oldestTimestamp);
+
+			if (earlier.length < limit) {
+				setHasMore(false);
+			}
+
+			if (earlier.length > 0) {
+				setMessages((prev) => {
+					const newMsgs = earlier.filter((em) => !prev.some((pm) => pm._id === em._id));
+					return [...newMsgs, ...prev];
+				});
+
+				requestAnimationFrame(() => {
+					if (container) {
+						const newScrollHeight = container.scrollHeight;
+						container.scrollTop = newScrollHeight - previousScrollHeight;
+					}
+				});
+			}
+		} catch (error) {
+			console.error("Error fetching earlier messages:", error);
+		} finally {
+			setIsFetchingEarlier(false);
+		}
+	};
+
+	const handleScroll = () => {
+		const container = feedRef.current;
+		if (!container) return;
+
+		if (container.scrollTop === 0) {
+			fetchEarlierMessages();
+		}
+	};
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setInputText(e.target.value);
@@ -132,150 +205,34 @@ const ChatWindow: React.FC = () => {
 		}
 
 		sendMessage(inputText.trim());
+		inputRef.current?.focus();
 	};
 
 	return (
 		<div className="flex-1 flex flex-col h-full bg-[#0b0f19]">
-			{/* Chat Header */}
-			<div className="flex items-center justify-between p-4 border-b border-blue-50/10 bg-[#0f172a] text-white">
-				<div className="flex items-center gap-3">
-					{/* Back Button (Mobile Only) */}
-					<button
-						onClick={() => setIsMobileChatOpen(false)}
-						className="md:hidden p-2 -ml-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200"
-					>
-						<ArrowLeft size={20} />
-					</button>
+			<ChatHeader
+				friend={friend}
+				isFriendTyping={isFriendTyping}
+				onBack={() => setIsMobileChatOpen(false)}
+			/>
 
-					<div className="relative">
-						<img
-							src={`https://avatarapi.runflare.run/public?usearname=${friend.username}`}
-							alt={friend.fullname}
-							className="w-10 h-10 rounded-full object-cover border border-slate-700"
-						/>
-						{friend.online ? (
-							<span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
-						) : (
-							<span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-slate-500 ring-2 ring-slate-900" />
-						)}
-					</div>
-					<div>
-						<h3 className="text-sm font-semibold text-slate-200">
-							{friend.fullname}
-						</h3>
-						<span className="text-xs text-slate-500">
-							{isFriendTyping ? (
-								<span className="text-blue-400 font-medium animate-pulse">typing...</span>
-							) : (
-								friend.online ? "online" : "offline"
-							)}
-						</span>
-					</div>
-				</div>
-				<div className="flex items-center gap-1">
-					<button className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
-						<Phone size={18} />
-					</button>
-					<button className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
-						<Video size={18} />
-					</button>
-					<button className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
-						<MoreVertical size={18} />
-					</button>
-				</div>
-			</div>
+			<MessageFeed
+				feedRef={feedRef}
+				onScroll={handleScroll}
+				isLoading={isLoading}
+				messages={messages}
+				user={user}
+				isFetchingEarlier={isFetchingEarlier}
+				isFriendTyping={isFriendTyping}
+			/>
 
-			{/* Messages Feed */}
-			<div className="flex-1 overflow-y-auto p-4 space-y-4">
-				{isLoading ? (
-					<div className="h-full flex items-center justify-center">
-						<div className="w-8 h-8 border-4 border-blue-50/30 border-t-blue-500 rounded-full animate-spin" />
-					</div>
-				) : messages.length === 0 ? (
-					<div className="h-full flex flex-col items-center justify-center text-slate-500">
-						<Smile size={40} className="mb-2 stroke-1" />
-						<p className="text-sm">Say hello to your new friend!</p>
-					</div>
-				) : (
-					messages.map((msg) => {
-						const isMe = msg.sender === user?.id;
-						const timeStr = msg.createdAt
-							? format(new Date(msg.createdAt), "h:mm a")
-							: "";
-						return (
-							<div
-								key={msg._id}
-								className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-								<div
-									className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
-										isMe
-											? "bg-blue-600 text-white rounded-br-none shadow-lg shadow-blue-600/15"
-											: "bg-slate-800/80 text-slate-200 rounded-bl-none border border-slate-700/30"
-									}`}>
-									<p className="leading-relaxed wrap-break-word">{msg.content}</p>
-									<span
-										className={`block text-[10px] mt-1 text-right ${
-											isMe ? "text-blue-200" : "text-slate-500"
-										}`}>
-										{timeStr}
-									</span>
-								</div>
-							</div>
-						);
-					})
-				)}
-
-				{/* Typing Indicator Bubble */}
-				{isFriendTyping && (
-					<div className="flex justify-start">
-						<div className="bg-slate-800/80 rounded-2xl rounded-bl-none px-4 py-3 border border-slate-700/30">
-							<div className="flex items-center gap-1">
-								<span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100" />
-								<span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200" />
-								<span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-300" />
-							</div>
-						</div>
-					</div>
-				)}
-				<div ref={messagesEndRef} />
-			</div>
-
-			{/* Message Input Section */}
-			<div className="p-4 border-t border-blue-50/10 bg-[#0f172a]">
-				<form
-					className="flex items-center gap-2"
-					onSubmit={handleSubmit}>
-					<button
-						type="button"
-						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
-						<Paperclip size={20} />
-					</button>
-					<button
-						type="button"
-						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
-						<Image size={20} />
-					</button>
-					<button
-						type="button"
-						className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
-						<Smile size={20} />
-					</button>
-					<input
-						type="text"
-						value={inputText}
-						onChange={handleInputChange}
-						placeholder="Type a message..."
-						disabled={isSending}
-						className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"
-					/>
-					<button
-						type="submit"
-						disabled={isSending || !inputText.trim()}
-						className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/10 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:active:scale-100">
-						<Send size={20} />
-					</button>
-				</form>
-			</div>
+			<MessageInput
+				inputRef={inputRef}
+				inputText={inputText}
+				onChange={handleInputChange}
+				onSubmit={handleSubmit}
+				isSending={isSending}
+			/>
 		</div>
 	);
 };

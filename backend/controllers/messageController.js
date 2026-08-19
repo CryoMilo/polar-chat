@@ -60,6 +60,7 @@ export default class messageController {
 		try {
 			const userId = req.user._id;
 			const { conversationId } = req.params;
+			const { limit = 20, before } = req.query;
 
 			const conversation = await Conversation.findById(conversationId);
 			if (!conversation) {
@@ -70,9 +71,17 @@ export default class messageController {
 				return res.status(403).json({ message: "You are not a participant of this conversation" });
 			}
 
-			const messages = await Message.find({ conversation: conversationId })
-				.sort({ createdAt: 1 })
+			const query = { conversation: conversationId };
+			if (before) {
+				query.createdAt = { $lt: new Date(before) };
+			}
+
+			const messages = await Message.find(query)
+				.sort({ createdAt: -1 })
+				.limit(Number(limit))
 				.lean();
+
+			messages.reverse();
 
 			res.json({ success: true, data: messages });
 		} catch (error) {
