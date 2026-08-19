@@ -21,7 +21,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer,
 
 	return <>
 		<div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-50">
-			<div className="bg-[#0f172a] border border-slate-800/80 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto w-full"
+			<div className="max-w-sm bg-[#0f172a] border border-slate-800/80 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto w-full"
 				style={{ maxWidth: sizeClass[size] }}>
 
 				<div className="p-6 border-b border-slate-800/60 flex justify-between items-center">

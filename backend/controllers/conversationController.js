@@ -29,6 +29,11 @@ export default class conversationController {
 			res.json({
 				success: true,
 				message: "Connect ID is valid",
+				data: {
+					id: friend._id.toString(),
+					username: friend.username,
+					fullname: friend.fullname,
+				},
 			});
 		} catch (error) {
 			console.log(error);
@@ -76,6 +81,13 @@ export default class conversationController {
 			const conversation = await Conversation.create({
 				participants: [userId, friend._id],
 			});
+
+			// Emit socket event to both requester and recipient rooms
+			const io = req.app.get("io");
+			if (io) {
+				io.to(userId.toString()).emit("conversation:new", { conversationId: conversation._id });
+				io.to(friend._id.toString()).emit("conversation:new", { conversationId: conversation._id });
+			}
 
 			res.json({
 				success: true,

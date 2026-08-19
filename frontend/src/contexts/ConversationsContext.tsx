@@ -4,6 +4,7 @@ import { useAuthStore } from "../../stores/authStore";
 import { useConversations } from "../hooks/useConversation";
 import { useSocketContext } from "./SocketContext";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import messageService from "../services/messageService";
 
 export type Conversation = {
@@ -62,6 +63,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [typingStatus, setTypingStatus] = useState<Record<string, boolean>>({});
 	const { socket } = useSocketContext();
 	const { user } = useAuthStore();
+	const queryClient = useQueryClient();
 
 	const conversationsRef = useRef<Conversation[]>([]);
 	const activeConversationRef = useRef<Conversation | null>(null);
@@ -178,12 +180,18 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 			setTypingStatus((prev) => ({ ...prev, [data.conversationId]: false }));
 		};
 
+		const handleNewConversation = () => {
+			queryClient.invalidateQueries({ queryKey: ["conversations"] });
+		};
+
+		socket?.on("conversation:new", handleNewConversation);
 		socket?.on("message:new", handleNewMessageGlobal);
 		socket?.on("typing:start", handleTypingStart);
 		socket?.on("typing:stop", handleTypingStop);
 
 		return () => {
 			socket?.off("conversation:online-status", handleConversationOnlineStatus);
+			socket?.off("conversation:new", handleNewConversation);
 			socket?.off("message:new", handleNewMessageGlobal);
 			socket?.off("typing:start", handleTypingStart);
 			socket?.off("typing:stop", handleTypingStop);
