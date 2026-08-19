@@ -1,7 +1,7 @@
-import { Mail } from "lucide-react";
 import { useState } from "react";
 import LoginForm from "./partials/LoginForm";
 import RegisterForm from "./partials/RegisterForm";
+import Logo from "../../components/ui/Logo";
 
 const Auth: React.FC = () => {
 	const [isLogin, setIsLogin] = useState(true);
@@ -11,8 +11,8 @@ const Auth: React.FC = () => {
 			{/* Left section: Decorative Brand panel */}
 			<div className="w-full md:w-1/2 bg-gradient-to-tr from-indigo-950 via-[#0f172a] to-[#0b0f19] border-b md:border-b-0 md:border-r border-slate-800/40 flex items-center justify-center p-8">
 				<div className="flex flex-col items-center gap-6 text-center max-w-sm">
-					<div className="bg-blue-600/10 border border-blue-500/20 rounded-3xl p-5 shadow-xl shadow-blue-500/5 animate-pulse">
-						<Mail className="text-blue-400" size={48} />
+					<div className="bg-blue-600/10 border border-blue-500/20 rounded-3xl p-4 shadow-xl shadow-blue-500/5 animate-pulse">
+						<Logo size={56} />
 					</div>
 					<div>
 						<h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-linear-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">
