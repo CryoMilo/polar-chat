@@ -26,7 +26,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
 				<div className="relative">
 					<img
-						src={`https://avatarapi.runflare.run/public?usearname=${friend.username}`}
+						src={friend.avatar || `https://avatarapi.runflare.run/public?username=${friend.username}`}
 						alt={friend.fullname}
 						className="w-10 h-10 rounded-full object-cover border border-slate-700"
 					/>

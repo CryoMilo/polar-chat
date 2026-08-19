@@ -6,7 +6,11 @@ import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import authService from "../../services/authService";
 
-const UserProfile: React.FC = () => {
+interface UserProfileProps {
+	onProfileClick?: () => void;
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({ onProfileClick }) => {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { user, logout } = useAuthStore();
@@ -18,6 +22,7 @@ const UserProfile: React.FC = () => {
 	const copyToClipboard = async () => {
 		try {
 			await navigator.clipboard.writeText(user.connectCode);
+			toast.success("Connect Code copied!");
 		} catch (error) {
 			console.log("Copy failed", error);
 			toast.error("Failed to Copy");
@@ -34,22 +39,31 @@ const UserProfile: React.FC = () => {
 
 	return (
 		<div className="p-4 border-t border-blue-50/10 bg-[#0b0f19] flex items-center justify-between">
-			<div className="flex items-center gap-3 min-w-0">
+			<div
+				onClick={onProfileClick}
+				className="flex items-center gap-3 min-w-0 cursor-pointer group select-none"
+			>
 				<div className="relative shrink-0">
 					<img
-						src={`https://avatarapi.runflare.run/public?usearname=${user.username}`}
+						src={user.avatar || `https://avatarapi.runflare.run/public?username=${user.username}`}
 						alt="User"
-						className="size-10 rounded-full object-cover border border-slate-700"
+						className="size-10 rounded-full object-cover border border-slate-700 group-hover:border-blue-500 transition-all duration-200"
 					/>
 					<span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
 				</div>
 				<div className="min-w-0">
-					<h4 className="text-sm font-semibold text-slate-200 truncate">
+					<h4 className="text-sm font-semibold text-slate-200 truncate group-hover:text-blue-400 transition-all duration-200">
 						{user.username}
 					</h4>
-					<div className="flex items-center gap-1 mt-0.5 text-xs text-slate-500 cursor-pointer hover:text-slate-300">
+					<div
+						onClick={(e) => {
+							e.stopPropagation();
+							copyToClipboard();
+						}}
+						className="flex items-center gap-1 mt-0.5 text-xs text-slate-500 hover:text-slate-300"
+					>
 						<span>#{user.connectCode}</span>
-						<Copy size={12} onClick={() => copyToClipboard()} />
+						<Copy size={12} />
 					</div>
 				</div>
 			</div>

@@ -38,7 +38,7 @@ const ConversationItem: React.FC<Conversation> = (props) => {
 			}`}>
 			<div className="relative shrink-0">
 				<img
-					src={`https://avatarapi.runflare.run/public?usearname=${friend.username}`}
+					src={friend.avatar || `https://avatarapi.runflare.run/public?username=${friend.username}`}
 					alt={friend.fullname}
 					className="w-12 h-12 rounded-full object-cover border border-slate-700/50"
 				/>

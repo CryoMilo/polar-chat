@@ -81,6 +81,7 @@ export default class AuthController {
 					username: user.username,
 					email: user.email,
 					connectCode: user.connectCode,
+					avatar: user.avatar || null,
 				},
 			});
 		} catch (error) {
@@ -118,10 +119,65 @@ export default class AuthController {
 					fullname: user.fullname,
 					email: user.email,
 					connectCode: user.connectCode,
+					avatar: user.avatar || null,
 				},
 			});
 		} catch (error) {
 			console.log(error);
+			res.status(500).json({ message: "Internal Server Error" });
+		}
+	}
+
+	static async updateProfile(req, res) {
+		try {
+			const userId = req.user._id;
+			const { fullname, username, avatar } = req.body;
+
+			if (!fullname || !username) {
+				return res.status(400).json({ message: "Fullname and username are required" });
+			}
+
+			if (fullname.length < 6 || fullname.length > 20) {
+				return res.status(400).json({ message: "Fullname must be between 6 and 20 characters" });
+			}
+
+			if (username.length < 6 || username.length > 20) {
+				return res.status(400).json({ message: "Username must be between 6 and 20 characters" });
+			}
+
+			// Check if username is already taken by another user
+			const existingUser = await User.findOne({ username });
+			if (existingUser && existingUser._id.toString() !== userId.toString()) {
+				return res.status(400).json({ message: "Username is already taken" });
+			}
+
+			const user = await User.findById(userId);
+			if (!user) {
+				return res.status(404).json({ message: "User not found" });
+			}
+
+			user.fullname = fullname;
+			user.username = username;
+			if (avatar !== undefined) {
+				user.avatar = avatar; // Base64 or null
+			}
+
+			await user.save();
+
+			res.status(200).json({
+				success: true,
+				message: "Profile updated successfully",
+				user: {
+					id: user.id,
+					username: user.username,
+					fullname: user.fullname,
+					email: user.email,
+					connectCode: user.connectCode,
+					avatar: user.avatar,
+				},
+			});
+		} catch (error) {
+			console.error("Error updating profile:", error);
 			res.status(500).json({ message: "Internal Server Error" });
 		}
 	}

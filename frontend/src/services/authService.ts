@@ -24,6 +24,15 @@ const authService = {
 	logout: async () => {
 		await apiClient.post("/auth/logout");
 	},
+
+	updateProfile: async (data: {
+		fullname: string;
+		username: string;
+		avatar: string | null;
+	}) => {
+		const response = await apiClient.put("/auth/profile", data);
+		return response.data;
+	},
 };
 
 export default authService;

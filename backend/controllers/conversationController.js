@@ -33,6 +33,7 @@ export default class conversationController {
 					id: friend._id.toString(),
 					username: friend.username,
 					fullname: friend.fullname,
+					avatar: friend.avatar || null,
 				},
 			});
 		} catch (error) {
@@ -136,8 +137,8 @@ export default class conversationController {
 				$or: [{ requester: userId }, { recipient: userId }],
 			})
 				.populate([
-					{ path: "requester", select: "id fullname username connectCode" },
-					{ path: "recipient", select: "id fullname username connectCode" },
+					{ path: "requester", select: "id fullname username connectCode avatar" },
+					{ path: "recipient", select: "id fullname username connectCode avatar" },
 				])
 				.lean();
 
@@ -203,6 +204,7 @@ export default class conversationController {
 							username: friend.username,
 							fullname: friend.fullname,
 							connectCode: friend.connectCode,
+							avatar: friend.avatar || null,
 							online: await RedisService.isUserOnline(friend._id.toString()),
 						},
 					};

@@ -7,6 +7,7 @@ export type User = {
 	username: string;
 	email: string;
 	connectCode: string;
+	avatar?: string | null;
 };
 
 interface AuthState {

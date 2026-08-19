@@ -4,9 +4,10 @@ import Logo from "../ui/Logo";
 
 interface HeaderProps {
 	onAddClick?: () => void;
+	onSettingsClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onAddClick }) => {
+const Header: React.FC<HeaderProps> = ({ onAddClick, onSettingsClick }) => {
 	return (
 		<div className="flex items-center justify-between p-4 border-b border-blue-50/10 bg-[#0f172a] text-white">
 			<div className="flex items-center gap-2">
@@ -25,7 +26,11 @@ const Header: React.FC<HeaderProps> = ({ onAddClick }) => {
 				>
 					<MessageSquarePlus size={20} />
 				</button>
-				<button className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200">
+				<button
+					onClick={onSettingsClick}
+					title="Profile Settings"
+					className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors duration-200"
+				>
 					<Settings size={20} />
 				</button>
 			</div>
