@@ -1,5 +1,5 @@
-import React from "react";
-import { Smile } from "lucide-react";
+import React, { useState } from "react";
+import { Smile, Check, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import type { Message } from "../../services/messageService";
 import type { User } from "../../../stores/authStore";
@@ -23,6 +23,12 @@ const MessageFeed: React.FC<MessageFeedProps> = ({
 	isFetchingEarlier,
 	isFriendTyping,
 }) => {
+	const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+
+	const handleMessageClick = (msgId: string) => {
+		setSelectedMessageId((prev) => (prev === msgId ? null : msgId));
+	};
+
 	return (
 		<div
 			ref={feedRef}
@@ -50,23 +56,39 @@ const MessageFeed: React.FC<MessageFeedProps> = ({
 						const timeStr = msg.createdAt
 							? format(new Date(msg.createdAt), "h:mm a")
 							: "";
+						const isSelected = selectedMessageId === msg._id;
 						return (
 							<div
 								key={msg._id}
-								className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+								className={`flex items-end gap-1.5 ${isMe ? "justify-end" : "justify-start"}`}>
+								
+								{/* Status Indicator Tick (Delivered / Read) */}
+								{isMe && (
+									<span className="text-slate-500/80 shrink-0 mb-1 select-none">
+										{msg.read ? (
+											<CheckCheck size={14} className="text-blue-400" />
+										) : (
+											<Check size={14} />
+										)}
+									</span>
+								)}
+
 								<div
-									className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
+									onClick={() => handleMessageClick(msg._id)}
+									className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm cursor-pointer select-none transition-all duration-200 ${
 										isMe
-											? "bg-blue-600 text-white rounded-br-none shadow-lg shadow-blue-600/15"
-											: "bg-slate-800/80 text-slate-200 rounded-bl-none border border-slate-700/30"
+											? "bg-blue-600 text-white rounded-br-none shadow-lg shadow-blue-600/15 active:bg-blue-700"
+											: "bg-slate-800/80 text-slate-200 rounded-bl-none border border-slate-700/30 active:bg-slate-700/80"
 									}`}>
 									<p className="leading-relaxed wrap-break-word">{msg.content}</p>
-									<span
-										className={`block text-[10px] mt-1 text-right ${
-											isMe ? "text-blue-200" : "text-slate-500"
-										}`}>
-										{timeStr}
-									</span>
+									{isSelected && (
+										<span
+											className={`block text-[10px] mt-1 text-right select-none animate-in fade-in slide-in-from-top-1 duration-150 ${
+												isMe ? "text-blue-200/90" : "text-slate-500"
+											}`}>
+											{timeStr}
+										</span>
+									)}
 								</div>
 							</div>
 						);
