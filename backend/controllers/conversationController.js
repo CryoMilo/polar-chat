@@ -91,6 +91,31 @@ export default class conversationController {
 		}
 	}
 
+	static async markAsRead(req, res) {
+		try {
+			const userId = req.user._id;
+			const { conversationId } = req.params;
+
+			const conversation = await Conversation.findById(conversationId);
+			if (!conversation) {
+				return res.status(404).json({ message: "Conversation not found" });
+			}
+
+			if (!conversation.participants.includes(userId.toString())) {
+				return res.status(403).json({ message: "Unauthorized" });
+			}
+
+			// Clear unread count for current user using mongoose map API
+			conversation.unreadCounts.set(userId.toString(), 0);
+			await conversation.save();
+
+			res.json({ success: true, message: "Conversation marked as read" });
+		} catch (error) {
+			console.error("Error marking conversation as read:", error);
+			res.status(500).json({ message: "Internal Server Error" });
+		}
+	}
+
 	static async getConversations(req, res) {
 		try {
 			const userId = req.user._id;

@@ -1,18 +1,22 @@
-import type { Conversation } from "../../contexts/ConversationsContext";
+import { useConversationContext, type Conversation } from "../../contexts/ConversationsContext";
 import { formatDistanceToNowStrict } from "date-fns";
 import { shortLocale } from "../../utils/dates";
 import { useAuthStore } from "../../../stores/authStore";
 import { useMobileChat } from "../../contexts/MobileChatContext";
 
-const ConversationItem: React.FC<Conversation> = ({
-	conversationId,
-	friend,
-	lastMessage,
-	unreadCounts,
-}) => {
+const ConversationItem: React.FC<Conversation> = (props) => {
+	const {
+		conversationId,
+		friend,
+		lastMessage,
+		unreadCounts,
+	} = props;
 	const lastMsg = lastMessage?.timestamp ? new Date(lastMessage.timestamp) : null;
 	const { user } = useAuthStore();
 	const { setIsMobileChatOpen } = useMobileChat();
+	const { activeConversation, setActiveConversation } = useConversationContext();
+
+	const isActive = activeConversation?.conversationId === conversationId;
 
 	const diffInTime = lastMsg
 		? formatDistanceToNowStrict(lastMsg, {
@@ -24,8 +28,13 @@ const ConversationItem: React.FC<Conversation> = ({
 	return (
 		<div
 			key={conversationId}
-			onClick={() => setIsMobileChatOpen(true)}
-			className="flex items-center gap-3 p-3 my-1 rounded-xl cursor-pointer hover:bg-slate-800/40 active:bg-slate-800/60 transition-all duration-200">
+			onClick={() => {
+				setActiveConversation(props);
+				setIsMobileChatOpen(true);
+			}}
+			className={`flex items-center gap-3 p-3 my-1 rounded-xl cursor-pointer active:bg-slate-800/60 transition-all duration-200 ${
+				isActive ? "bg-slate-800/80 shadow-md ring-1 ring-blue-500/20" : "hover:bg-slate-800/40"
+			}`}>
 			<div className="relative shrink-0">
 				<img
 					src={`https://avatarapi.runflare.run/public?usearname=${friend.username}`}

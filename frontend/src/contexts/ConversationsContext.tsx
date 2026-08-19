@@ -1,8 +1,10 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { User } from "../../stores/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import { useConversations } from "../hooks/useConversation";
 import { useSocketContext } from "./SocketContext";
 import { toast } from "sonner";
+import messageService from "../services/messageService";
 
 export type Conversation = {
 	conversationId: string;
@@ -21,6 +23,8 @@ type ConversationsContextype = {
 	filteredConversations: Conversation[];
 	searchTerm: string;
 	setSearchTerm: (term: string) => void;
+	activeConversation: Conversation | null;
+	setActiveConversation: (conversation: Conversation | null) => Promise<void>;
 
 	isLoading: boolean;
 	isError: boolean;
@@ -53,19 +57,60 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 	const { data, isLoading, isError } = useConversations();
 	const [conversations, setConversations] = useState<Conversation[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
+	const [activeConversation, setActiveConversationState] = useState<Conversation | null>(null);
 	const { socket } = useSocketContext();
+	const { user } = useAuthStore();
 
 	const conversationsRef = useRef<Conversation[]>([]);
+	const activeConversationRef = useRef<Conversation | null>(null);
+
 	useEffect(() => {
 		conversationsRef.current = conversations;
 	}, [conversations]);
+
+	useEffect(() => {
+		activeConversationRef.current = activeConversation;
+	}, [activeConversation]);
 
 	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		if (data) setConversations(data.data);
 	}, [data]);
 
-	const filteredConversations = conversations?.filter((c) =>
+	const setActiveConversation = async (conversation: Conversation | null) => {
+		setActiveConversationState(conversation);
+		if (conversation) {
+			try {
+				await messageService.markAsRead(conversation.conversationId);
+				setConversations((prev) => {
+					return prev.map((c) => {
+						if (c.conversationId === conversation.conversationId) {
+							const clearedUnread = { ...c.unreadCounts };
+							if (user) {
+								clearedUnread[user.id] = 0;
+							}
+							return {
+								...c,
+								unreadCounts: clearedUnread,
+							};
+						}
+						return c;
+					});
+				});
+			} catch (error) {
+				console.error("Failed to mark conversation as read:", error);
+			}
+		}
+	};
+
+	const sortedConversations = [...(conversations || [])].sort((a, b) => {
+		const timeA = a.lastMessage?.timestamp ? new Date(a.lastMessage.timestamp).getTime() : 0;
+		const timeB = b.lastMessage?.timestamp ? new Date(b.lastMessage.timestamp).getTime() : 0;
+		return timeB - timeA;
+	});
+
+	const filteredConversations = sortedConversations.filter((c) =>
+		c.friend.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
 		c.friend.username.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
@@ -98,10 +143,38 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 	useEffect(() => {
 		socket?.on("conversation:online-status", handleConversationOnlineStatus);
 
+		const handleNewMessageGlobal = (newMessage: any) => {
+			const activeConv = activeConversationRef.current;
+			setConversations((prev) => {
+				return prev.map((c) => {
+					if (c.conversationId === newMessage.conversation) {
+						const updatedUnread = { ...c.unreadCounts };
+						if (!activeConv || activeConv.conversationId !== c.conversationId) {
+							if (user) {
+								updatedUnread[user.id] = (updatedUnread[user.id] || 0) + 1;
+							}
+						}
+						return {
+							...c,
+							lastMessage: {
+								content: newMessage.content,
+								timestamp: new Date(newMessage.createdAt),
+							},
+							unreadCounts: updatedUnread,
+						};
+					}
+					return c;
+				});
+			});
+		};
+
+		socket?.on("message:new", handleNewMessageGlobal);
+
 		return () => {
 			socket?.off("conversation:online-status", handleConversationOnlineStatus);
+			socket?.off("message:new", handleNewMessageGlobal);
 		};
-	}, [socket]);
+	}, [socket, user]);
 
 	return (
 		<ConversationsContext.Provider
@@ -110,6 +183,8 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
 				filteredConversations,
 				searchTerm,
 				setSearchTerm,
+				activeConversation,
+				setActiveConversation,
 				isLoading,
 				isError,
 			}}>

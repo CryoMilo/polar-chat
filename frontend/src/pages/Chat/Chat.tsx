@@ -5,9 +5,14 @@ import ChatPlaceholder from "../../components/ChatWindow/ChatPlaceholder";
 import { SocketProvider } from "../../contexts/SocketContext";
 import { MobileChatProvider, useMobileChat } from "../../contexts/MobileChatContext";
 
+import { useConversationContext } from "../../contexts/ConversationsContext";
+
+import { ConversationProvider } from "../../contexts/ConversationsContext";
+
 const ChatContent: React.FC = () => {
 	const { isMobileChatOpen } = useMobileChat();
-	const hasSelectedChat = true;
+	const { activeConversation } = useConversationContext();
+	const hasSelectedChat = !!activeConversation;
 
 	return (
 		<div className="flex h-screen w-screen overflow-hidden bg-[#0b0f19]">
@@ -28,7 +33,9 @@ const Chat: React.FC = () => {
 	return (
 		<MobileChatProvider>
 			<SocketProvider>
-				<ChatContent />
+				<ConversationProvider>
+					<ChatContent />
+				</ConversationProvider>
 			</SocketProvider>
 		</MobileChatProvider>
 	);

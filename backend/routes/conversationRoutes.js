@@ -14,6 +14,11 @@ router.post(
 	authMiddleware,
 	ConversationController.addConversation
 );
+router.post(
+	"/:conversationId/read",
+	authMiddleware,
+	ConversationController.markAsRead
+);
 router.get("/", authMiddleware, ConversationController.getConversations);
 
 export default router;

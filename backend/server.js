@@ -8,6 +8,7 @@ import http from "http";
 import { connectDB } from "./utils/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 import { Server } from "socket.io";
 import { initializeSocket } from "./socket.js";
 import { socketAuthMiddleware } from "./socket/socketAuthMiddleware.js";
@@ -28,6 +29,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/conversations", conversationRoutes);
+app.use("/api/messages", messageRoutes);
 
 const io = new Server(httpserver, {
 	cors: {
@@ -38,6 +40,8 @@ const io = new Server(httpserver, {
 	pingInterval: 25000,
 	pingTimeout: 60000,
 });
+
+app.set("io", io);
 
 io.use(socketAuthMiddleware);
 
